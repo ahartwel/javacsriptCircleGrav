@@ -1,0 +1,22 @@
+if (this.justStarted) {
+        
+        console.log(this.xPos + " , " + this.yPos);
+           
+        this.xPos = GravClusters[this.gravId].platforms[this.platformId].xPos;
+    this.yPos = GravClusters[this.gravId].platforms[this.platformId].yPos;
+         if (this.xPos!==0) {    
+        this.justStarted = false;
+             this.dis = [this.gravId].platforms[this.platformId].d;
+            this.rot = [this.gravId].platforms[this.platformId].r;
+            this.rSpeed = [this.gravId].platforms[this.platformId].rSpeed;
+                
+             
+             
+        }
+        
+            
+            
+        } else {
+         console.log(this.xPos + " x, " + this.yPos + " y, " + this.dis + " d, " + this.rot + " r, " + this.rSpeed + " rSpeed");   
+            
+        }
