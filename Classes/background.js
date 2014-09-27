@@ -69,6 +69,7 @@
                 
                 if (dist(GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,this.xPos,this.yPos)<=5) {
                     this.hold = true;
+                    bG.holdCount++;
                     this.d = (Math.random() * window.innerWidth*2) - (window.innerWidth*.25) ;
             this.r = Math.random() * 360;
             
@@ -90,10 +91,11 @@
                     
              this.fire[i].xPos=GravClusters[person.activeG].cX;   
              this.fire[i].yPos=GravClusters[person.activeG].cY;  
-                       bG.synth.playSound( ((this.size)/(window.innerWidth*0.01)*.8)/15 );
+                     
              this.explosion=false;
                        this.explosiondisplay= true;
                        this.hold=false;
+                       bG.holdCount--;
             }
                 }
                     
@@ -175,7 +177,7 @@
         function Background() {
             
             
-          this.synth = new fmSynth("G2", "triangle","", "", "", "", "square", "fifth", .03, .05, "simpleFM");
+          this.synth = new fmSynth("G2", "triangle","", "", "", "", "square", "fifth", .03, .08, "simpleFM");
             
             this.xPos = [];
             this.yPos = [];
@@ -206,7 +208,7 @@
             }
             
             
-            
+            this.holdCount=0;
             
             this.bassDrumHit = function() {
     
@@ -216,6 +218,9 @@
       
                         }
                     }
+                
+                  bG.synth.playSound( ((this.holdCount)/4*.6) );
+                
                 };
             
             
@@ -224,6 +229,10 @@
             
             
             this.update = function () {
+                if (this.holdCount<0) {
+                 this.holdCount=0;   
+                }
+                
                 this.synth.update();
           
                 
@@ -275,17 +284,41 @@
             
             this.display = function () {
                 
-                var gradient = bCtx.createRadialGradient(GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,5,GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,.5*window.innerWidth);
-                gradient.addColorStop(0, centerColors[1]);
-                gradient.addColorStop(.6, centerColors[2]);
                 
+               
+               
+                if (this.holdCount<0) {
+                 this.holdCount=0;   
+                }
+              
+             
+                
+                
+                var gradient = bCtx.createRadialGradient(GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,5,GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,.5*window.innerWidth);
+               
+                var stop2 = this.holdCount/7;
+                if (stop2>1) {
+                 stop2 =1;   
+                } else if(stop2<.1) {
+                 stop2=.1;   
+                }
+                
+                
+                  gradient.addColorStop(stop2*0.1, "rgba(110,20,150,.3)");
+                
+                gradient.addColorStop(stop2*0.2,centerColors[1]);
+                gradient.addColorStop(stop2, centerColors[2]);
+               
                 
                 bCtx.fillStyle = gradient;
                 bCtx.fillRect(GravClusters[person.activeG].cX - (.5*window.innerWidth), GravClusters[person.activeG].cY - (.5*window.innerHeight), window.innerWidth, window.innerHeight);
                 
-                     bCtx.fillStyle = "rgba(0,0,0,.05)";
+                
+                
+                
+                    bCtx.fillStyle = "rgba(0,0,0,.08)";
                  bCtx.rect(0,0,window.innerWidth, window.innerHeight);   
-                 bCtx.fill(); 
+                 bCtx.fill();    
                 
                 
                   bCtx.fillStyle = "rgba(0,0,0,.4)";

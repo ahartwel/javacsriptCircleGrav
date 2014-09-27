@@ -74,13 +74,9 @@
             this.playNote = function(vel) {
                 
               
-                if (person.gain.gain.value< person.gain2.gain.value) {
-                person.osc.frequency.linearRampToValueAtTime(dMinorScale[ Math.floor( lerp(dMinorScale.length*.5, dMinorScale.length, dist(this.xPos,this.yPos,person.xPos,person.yPos) / window.innerWidth) ) ], audioCtx.currentTime + .05);
-                } else {
-                  person.osc4.frequency.linearRampToValueAtTime(dMinorScale[ Math.floor( lerp(dMinorScale.length*.5, dMinorScale.length, dist(this.xPos,this.yPos,person.xPos,person.yPos) / window.innerWidth) ) ], audioCtx.currentTime + .05);
-                }
+              
                  
-                person.playnote(vel);
+                person.synth.playSound(vel/2, this.xPos, this.yPos);
                 
             };
             

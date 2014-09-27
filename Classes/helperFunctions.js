@@ -41,19 +41,21 @@ function runBeat() {
     if (beatTracker>=15) {
      beatTracker=0;
         beat++;
-        
+        beatStart=true;
     }
     
+    
+    if (beatStart==true) {
     if (beat>=32) {
      beat=0;   
     }
     
-    if (beat%4==0) {
+    if (beat%8==0 || beat%8==7 || beat%8==2) {
      bassDrumHit();   
     }
     
-   
-    
+   beatStart=false;
+    }
 }
 
 
@@ -78,15 +80,15 @@ function fmSynth(noteName, oscType, oscType2, oscType3, oscType4, oscType5, oscT
     var impulseR = impulse.getChannelData(1);
 
     if (!decay)
-        decay = 2.0;
+        decay = 0.2;
     for (var i = 0; i < length; i++){
       var n = reverse ? length - i : i;
-      impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
-      impulseR[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+      impulseL[i] = (Math.random() * .5 - .5) * Math.pow(1 - n / length, decay);
+      impulseR[i] = (Math.random() * .5 - .5) * Math.pow(1 - n / length, decay);
     }
     return impulse;
 }
-            this.convolveBuffer = impulseResponse(15,10,false);
+            this.convolveBuffer = impulseResponse(8,10,false,true);
             this.convolve = audioCtx.createConvolver();
             this.convolve.buffer = this.convolveBuffer;
             
@@ -145,6 +147,15 @@ function fmSynth(noteName, oscType, oscType2, oscType3, oscType4, oscType5, oscT
         this.osc.start();
         this.osc2.start();
       } else {
+          
+          
+          this.osc = audioCtx.createOscillator();
+            this.osc2 = audioCtx.createOscillator();
+            this.osc3 = audioCtx.createOscillator();
+              this.osc4 = audioCtx.createOscillator();
+            this.osc5 = audioCtx.createOscillator();
+            this.osc6 = audioCtx.createOscillator();
+
           
            this.gain = audioCtx.createGain();
             this.gain2 = audioCtx.createGain();
@@ -233,7 +244,7 @@ function fmSynth(noteName, oscType, oscType2, oscType3, oscType4, oscType5, oscT
     }
     
     
-      this.playSound = function(volume) {
+      this.playSound = function(volume, xPos, yPos) {
           
           if (this.synthVersion=="simpleFM") {
              this.osc2.frequency.value= this.n.frequency();
@@ -248,18 +259,18 @@ function fmSynth(noteName, oscType, oscType2, oscType3, oscType4, oscType5, oscT
           } else if (this.synthVersion=="platforms") {
               
               
-              if (this..gain.gain.value< this..gain2.gain.value) {
-                this..osc.frequency.linearRampToValueAtTime(dMinorScale[ Math.floor( lerp(dMinorScale.length*.5, dMinorScale.length, dist(this.xPos,this.yPos,this..xPos,this..yPos) / window.innerWidth) ) ], audioCtx.currentTime + .05);
+              if (this.gain.gain.value< this.gain2.gain.value) {
+                this.osc.frequency.linearRampToValueAtTime(dMinorScale[ Math.floor( lerp(dMinorScale.length*.5, dMinorScale.length, dist(xPos,yPos,person.xPos,person.yPos) / window.innerWidth) ) ], audioCtx.currentTime + .05);
                 } else {
-                  this..osc4.frequency.linearRampToValueAtTime(dMinorScale[ Math.floor( lerp(dMinorScale.length*.5, dMinorScale.length, dist(this.xPos,this.yPos,this..xPos,this..yPos) / window.innerWidth) ) ], audioCtx.currentTime + .05);
+                  this.osc4.frequency.linearRampToValueAtTime(dMinorScale[ Math.floor( lerp(dMinorScale.length*.5, dMinorScale.length, dist(xPos,yPos,person.xPos,person.yPos) / window.innerWidth) ) ], audioCtx.currentTime + .05);
                 }
               
               
               
                if (this.gain.gain.value< this.gain2.gain.value) {
-                this.gain.gain.value = velocity;
+                this.gain.gain.value = volume;
                 } else {
-                    this.gain2.gain.value = velocity;  
+                    this.gain2.gain.value = volume;  
                 }
               
               
@@ -270,49 +281,6 @@ function fmSynth(noteName, oscType, oscType2, oscType3, oscType4, oscType5, oscT
             };
     
     
-    
-        function impulseResponse( duration, decay, reverse ) {
-    var sampleRate = audioCtx.sampleRate;
-    var length = sampleRate * duration;
-    var impulse = audioCtx.createBuffer(2, length, sampleRate);
-    var impulseL = impulse.getChannelData(0);
-    var impulseR = impulse.getChannelData(1);
 
-    if (!decay)
-        decay = 2.0;
-    for (var i = 0; i < length; i++){
-      var n = reverse ? length - i : i;
-      impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
-      impulseR[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
-    }
-    return impulse;
-}
-            this.convolveBuffer = impulseResponse(15,10,false);
-            this.convolve = audioCtx.createConvolver();
-            this.convolve.buffer = this.convolveBuffer;
-            
-            
-            var bufferSize = 4096;
-            this.bitCrush = (function() {
-    var node = audioCtx.createScriptProcessor(bufferSize, 1, 1);
-    node.bits = 16; // between 1 and 16
-    node.normfreq = 0.6; // between 0.0 and 1.0
-    var step = Math.pow(1/2, node.bits);
-    var phaser = 0;
-    var last = 0;
-    node.onaudioprocess = function(e) {
-        var input = e.inputBuffer.getChannelData(0);
-        var output = e.outputBuffer.getChannelData(0);
-        for (var i = 0; i < bufferSize; i++) {
-            phaser += node.normfreq;
-            if (phaser >= 1.0) {
-                phaser -= 1.0;
-                last = step * Math.floor(input[i] / step + 0.5);
-            }
-            output[i] = last;
-        }
-    };
-    return node;
-})();
     
 }
