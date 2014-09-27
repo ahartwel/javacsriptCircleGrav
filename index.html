@@ -1,0 +1,374 @@
+
+
+
+<html>
+
+<head>
+    <title>Cirlce Level</title>
+    <script src="Classes/player.js"></script>
+    <script src="Classes/background.js"></script>
+    <script src="Classes/gravCluster.js"></script>
+    <script src="Classes/helperFunctions.js"></script>
+    <script src="Classes/platforms.js"></script>
+    <script src="Classes/trees.js"></script>
+    <script src="Classes/rocks.js"></script>
+    <script src="Classes/music.js"></script>
+</head>
+<style>
+    canvas {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+    }
+    #bCanvas {
+        width: auto!important;
+        height: auto!important;
+    }
+    #fps {
+        position: absolute;
+        width: 100;
+        height: 100;
+        background-color: white;
+        top: 0px;
+        left: 0px;
+    }
+</style>
+
+<body>
+
+    <canvas id="bCanvas"></canvas>
+    <canvas id="mainCanvas"></canvas>
+   
+   <img id="downloadLnk" src=""></img>
+    <script>
+        
+        /*
+        var o = { 
+  a: {
+    b:2
+  }
+}; // 2 objects are created. One is referenced by the other as one of its property.
+// The other is referenced by virtue of being assigned to the 'o' variable.
+// Obviously, none can be garbage-collected
+
+
+var o2 = o; // the 'o2' variable is the second thing that has a reference to the object
+o = 1; // now, the object that was originally in 'o' has a unique reference embodied by the 'o2' variable
+
+var oa = o2.a; // reference to 'a' property of the object.
+// This object has now 2 references: one as a property, the other as the 'oa' variable
+
+o2 = "yo"; // The object that was originally in 'o' has now zero references to it.
+// It can be garbage-collected.
+// However what was its 'a' property is still referenced by the 'oa' variable, so it cannot be free'd
+
+oa = null; // what was the 'a' property of the object originally in o has zero references to it.
+// it can be garbage collected.
+
+GARBAGE COLLECTION ON EVERYTHING(ESPECIALLY IN TREES, ANYTHING DECLARED WITH VAR (PROBABLY)
+CHANGE ANGLE AND D TO A
+CLOSURES
+
+*/
+
+        
+        
+       
+        var audioCtx = new AudioContext();
+        
+        
+        var n = Note.fromLatin('G3');
+        var scale = n.scale('major pentatonic');
+        n = Note.fromLatin('G4');
+        var scale2 = n.scale('major pentatonic');
+         n = Note.fromLatin('G5');
+        var scale3 = n.scale('major pentatonic');
+        
+        var dMinorScale = [];
+        
+        for (var i = 0;i<scale.length;i++) {
+         dMinorScale[i] = scale[i].frequency();   
+        } 
+        for (var i = scale.length;i<scale2.length;i++) {
+         dMinorScale[i] = scale2[i].frequency();   
+        }   for (var i = scale2.length;i<scale3.length;i++) {
+         dMinorScale[i] = scale3[i].frequency();   
+        }
+        
+        var majorScale = [130.81, 146.83, 164.81, 174.61, 220, 246.94, 261.63, 293.66, 329.63, 392, 440, 493];
+       // var dMinorScale = [29.14, 32.7, 34.65, 43.65, 46.25, 51.91, 58.27, 65.41, 73.42, 82.41, 87.31, 110.0, 116.54, 130.81, 164.81, 174.61, 196, 233.08, 293.66 ];
+        
+      //  var dMinorScaleF = [29.14, 32.7, 34.65, 38.89,43.65, 46.25, 51.91, 58.27, 65.41, 73.42, 82.41, 87.31, 98, 110.0, 116.54, 130.81, 146.83, 164.81, 174.61, 196, 220, 233.08, 261.63, 293.66 ];
+        
+        var earthColors = [];
+        earthColors[0] = {
+            r: "125",
+            g: "101",
+            b: "80"
+        }
+        earthColors[1] = {
+            r: "168",
+            g: "146",
+            b: "105"
+        }
+        earthColors[2] = {
+            r: "86",
+            g: "100",
+            b: "80"
+        }
+
+        
+        var cloudColors = [];
+        
+        cloudColors[0] = {
+            r: "243",
+            g: "83",
+            b: "97"
+        };   
+        cloudColors[1] = {
+            r: "163",
+            g: "75",
+            b: "90"
+        };   
+        cloudColors[2] = {
+            r: "89",
+            g: "44",
+            b: "63"
+        };   
+        cloudColors[3] = {
+            r: "65",
+            g: "38",
+            b: "56"
+        };
+        cloudColors[4] = {
+            r: "244",
+            g: "106",
+            b: "106"
+        };
+        
+        
+        var centerColors = [];
+        centerColors[0] = "rgba(98,29,40,.8)"
+        centerColors[1] = "rgba(98,29,40,.08)"
+        centerColors[2] = "rgba(0,0,0,0)"
+
+        var filterStrength = 20;
+       
+       
+        var mainC = document.getElementById("mainCanvas");
+        var bC = document.getElementById("bCanvas");;
+        mainC.width = window.innerWidth;
+        mainC.height = window.innerHeight;
+        bC.width = window.innerWidth;
+        bC.height = window.innerHeight;
+        var mCtx = mainC.getContext('2d');
+        var bCtx = bC.getContext('2d');
+
+        bCtx.fillStyle = "rgb(0,0,0)";
+        bCtx.rect(0, 0, window.innerWidth, window.innerHeight);
+        bCtx.fill();
+        
+        var rock = [];
+        var rockCounter=0;
+        var GravClusters = [];
+
+        for (var i = 0; i < 3; i++) {
+            GravClusters[i] = new GravityCenter(i * 2400 + 100, 500, 1200, i);
+          
+        }
+
+
+        var beatTracker = 0;
+        var beat = 0;
+
+
+
+        var person = new Player(200, 200);
+        // person.mute();
+        var bG = new Background();
+       // bG.mute();
+        window.addEventListener("keydown", keyPressed, false);
+
+        function keyPressed(e) {
+            e.preventDefault();
+            switch (e.keyCode) {
+            case 37: //left
+
+                GravClusters[person.activeG].rotationSpeed(-0.12);
+
+                break;
+            case 38: //up
+
+                if (person.jumpCounter < 3) {
+                    person.dAcc = -3;
+                }
+                person.jumpCounter++;
+
+                break;
+            case 39: //right
+
+                GravClusters[person.activeG].rotationSpeed(0.12);
+                break;
+            case 40:
+                //down
+                person.falling = true;
+                setTimeout(function () {
+                    person.falling = false;
+
+                }, 550);
+                break;
+
+            case 32:
+
+                break;
+
+            case 65:
+                person.movePlayer("left");
+                 
+                    //a
+                break;
+                
+                    
+            case 68:
+                 person.movePlayer("right");
+                      
+                break;
+            }
+            
+            
+            
+        }
+
+
+       
+      
+        
+       
+       
+       var counter = 0;  
+        var justStarted = 0;
+        function animate() {
+
+            runBeat();
+          
+          
+            
+            person.update();
+           
+            bG.update();
+            
+            
+            for (var i = 0; i < GravClusters.length; i++) {
+                GravClusters[i].update();
+              
+
+            }
+            
+            for (var i = 0; i < rock.length; i++) {
+               rock[i].update();   
+                
+            }
+            
+            counter++;
+            if (counter>=1) {
+            counter=-1; 
+               
+                
+                
+             mCtx.clearRect(0, 0, mainC.width, mainC.height);
+            
+                 for (var i = 0; i < GravClusters.length; i++) {
+                       GravClusters[i].displayBack();
+                 }
+                
+                
+                
+                for (var i = 0; i < rock.length; i++) {
+               rock[i].display();   
+                
+            }
+            
+            person.display();
+            for (var i = 0; i < GravClusters.length; i++) {
+                       GravClusters[i].displayFront();
+                 }
+                
+            /*
+              for (var i = 0; i < GravClusters.length; i++) {
+                GravClusters[i].displayFront();
+
+            }
+            */
+            
+            bG.display();
+           
+              var gradient = mCtx.createRadialGradient(GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,5,GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,.5*window.innerWidth);
+                gradient.addColorStop(0, centerColors[0]);
+                gradient.addColorStop(.6, centerColors[2]);
+                
+                
+                mCtx.fillStyle = gradient;
+                mCtx.fillRect(GravClusters[person.activeG].cX - (.5*window.innerWidth), GravClusters[person.activeG].cY - (.5*window.innerHeight), window.innerWidth, window.innerHeight);
+                
+             /*   
+                if (justStarted<=500) {
+            justStarted++;
+                    if (justStarted==450) {
+                       
+                      //  var link = GravClusters[person.activeG].canvas.toDataURL('image/png');
+                    //    document.getElementById('downloadLnk').src =link;
+                     justStarted=1000;   
+                    }
+                }
+                */
+                
+            
+            }
+
+        
+
+            requestAnimationFrame(animate);
+        }
+
+        
+        /* setInterval(function() {
+
+            mCtx.clearRect(0, 0, mainC.width, mainC.height);
+            for (var i = 0; i < GravClusters.length; i++) {
+                GravClusters[i].update();
+
+            }
+
+            person.display();
+            person.update();
+            bG.display();
+            bG.update();
+
+
+        
+
+            requestAnimationFrame(animate);
+        }, 1000/45);
+
+*/
+
+
+
+
+
+        
+
+
+
+      
+        
+          requestAnimationFrame(animate);
+        
+    </script>
+</body>
+
+
+
+</html>

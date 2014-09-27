@@ -1,22 +1,36 @@
-if (this.justStarted) {
-        
-        console.log(this.xPos + " , " + this.yPos);
-           
-        this.xPos = GravClusters[this.gravId].platforms[this.platformId].xPos;
-    this.yPos = GravClusters[this.gravId].platforms[this.platformId].yPos;
-         if (this.xPos!==0) {    
-        this.justStarted = false;
-             this.dis = [this.gravId].platforms[this.platformId].d;
-            this.rot = [this.gravId].platforms[this.platformId].r;
-            this.rSpeed = [this.gravId].platforms[this.platformId].rSpeed;
-                
-             
-             
-        }
-        
-            
-            
-        } else {
-         console.log(this.xPos + " x, " + this.yPos + " y, " + this.dis + " d, " + this.rot + " r, " + this.rSpeed + " rSpeed");   
-            
-        }
+
+                if (dist(this.xPos, this.yPos, rock[i].xPos, rock[i].yPos) < rock[i].canvas.width + 200) {
+
+                    var aX = this.xPos + (Math.cos(radians(this.r + 90)) * (.51 * this.w));
+                    var aY = this.yPos + (Math.sin(radians(this.r + 90)) * (.51 * this.w));
+
+                    var bX = this.xPos - (Math.cos(radians(this.r + 90)) * (.51 * this.w));
+                    var bY = this.yPos - (Math.sin(radians(this.r + 90)) * (.51 * this.w));
+                    
+                    
+                    var d = dist(bX, bY, rock[i].xPos, rock[i].yPos);
+                    var c = dist(aX, aY, rock[i].xPos, rock[i].yPos);
+                    var x = lerp(bX, aX, d / (d + c));
+                    var y = lerp(bY, aY, d / (d + c));
+                    //console.log(d);
+                    if (dist(rock[i].xPos, rock[i].yPos, x, y) <= rock[i].w * .8) {
+                    
+                      
+                        
+                        if (rock[i].dAcc > 0) {
+                            if (rock[i].falling) {
+                                rock[i].dAcc = 2;
+                            } else {
+                                rock[i].dAcc = -.2 * rock[i].dAcc;
+                            }
+
+                            rock[i].rSpeed = lerp(rock[i].rSpeed, this.rSpeed, .95);
+                           
+                            
+                            rock[i].dis += .1;
+
+                            rock[i].jumpCounter = 0;
+                        }
+
+                    }
+                }

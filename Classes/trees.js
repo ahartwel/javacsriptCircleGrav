@@ -325,9 +325,9 @@
         
                 
                
-                var r = 242;
-                var g = 7;
-                var b = 160;
+                var r = 157;
+                var g = 238;
+                var b = 255;
                 
                 this.branches = [];
                 for (var i=0; i<numOfBranches; i ++) {
@@ -350,7 +350,7 @@
                     b+=4;
                     g+=4;
                 }
-                console.log(this.branches);
+               
                
        
              
@@ -361,7 +361,7 @@
                 this.context.clearRect(0,0,this.canvas.width, this.canvas.height);
                 
                 
-                 this.context.strokeStyle = "rgb(145,81,1)";
+                 this.context.strokeStyle = "rgb(247,248,232)";
                 this.context.lineWidth = 5;
                 this.context.beginPath();
                 this.context.moveTo(this.branchX[0],this.branchY[0]);

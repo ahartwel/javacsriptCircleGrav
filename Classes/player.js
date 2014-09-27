@@ -1,6 +1,9 @@
 
         function Player(x, y) {
             
+            
+            
+            
             this.osc = audioCtx.createOscillator();
             this.osc2 = audioCtx.createOscillator();
             this.osc3 = audioCtx.createOscillator();
@@ -64,12 +67,12 @@
             this.gainMaster = audioCtx.createGain();
             
             
-            this.osc.type = "sawtooth";
-            this.osc.frequency.value = 700;
+            this.osc.type = "square";
+            this.osc.frequency.value = 20;
             this.osc.start();
             
             
-            this.osc2.type = "sin";
+            this.osc2.type = "square";
             this.osc2.frequency.value = this.osc.frequency.value/6.4;
             this.osc2.start();
             
@@ -80,12 +83,12 @@
             this.osc3.start();
             
             
-            this.osc4.type = "sawtooth";
-            this.osc4.frequency.value = 700;
+            this.osc4.type = "square";
+            this.osc4.frequency.value = 20;
             this.osc4.start();
             
             
-            this.osc5.type = "sin";
+            this.osc5.type = "square";
             this.osc5.frequency.value = this.osc.frequency.value/6.4;
             this.osc5.start();
             
@@ -133,12 +136,12 @@
             this.rAcc = .003;
             this.rSpeed = 0;
             this.canvas = document.createElement('canvas');
-            this.canvas.width = .045 * window.innerWidth;
+            this.canvas.width = .055 * window.innerWidth;
             this.canvas.height = this.canvas.width;
             this.falling = false;
             this.context = this.canvas.getContext('2d');
 
-            this.w = (.09 * window.innerWidth) * .3;
+            this.w = (.2 * window.innerWidth) * .3;
 
             this.halfW = .5 * window.innerWidth;
             this.halfH = .5 * window.innerHeight;
@@ -183,9 +186,9 @@
             
             this.playnote = function(velocity) {
                 if (this.gain.gain.value< this.gain2.gain.value) {
-                this.gain.gain.value = velocity;
+                this.gain.gain.value = velocity/3;
                 } else {
-                    this.gain2.gain.value = velocity;  
+                    this.gain2.gain.value = velocity/3;  
                 }
                 
                 
@@ -196,8 +199,8 @@
                     if (this.gain.gain.value>=.001) {
                 this.gain.gain.value = lerp(this.gain.gain.value, 0, .05);
                         this.osc.frequency.value = this.osc.frequency.value; 
-                        this.osc2.frequency.value = this.osc.frequency.value/8;
-                         this.osc3.frequency.value = this.osc.frequency.value/2;
+                        this.osc2.frequency.value = this.osc.frequency.value;
+                         this.osc3.frequency.value = this.osc.frequency.value;
                         
                        
                     }
@@ -205,8 +208,8 @@
                  if (this.gain2.gain.value>=.001) {
                   this.gain2.gain.value = lerp(this.gain2.gain.value, 0, .05);
                      this.osc4.frequency.value = this.osc.frequency.value; 
-                        this.osc5.frequency.value = this.osc.frequency.value/8;
-                         this.osc6.frequency.value = this.osc.frequency.value/2; 
+                        this.osc5.frequency.value = this.osc.frequency.value;
+                         this.osc6.frequency.value = this.osc.frequency.value; 
                  }
                 
                 
@@ -237,18 +240,23 @@
 
 
 
-                this.activeGrav();
-
                 for (var i = 0; i < this.orbs.length; i++) {
                     this.orbs[i].update();
                 }
 
+
+                this.activeGrav();
+                
+                
                 this.dAcc += this.gravity;
                 this.r += this.rSpeed;
                 this.r += this.moveSpeed;
                
+                if (-.0003<this.moveSpeed && this.moveSpeed<.0003) {
+                 this.moveSpeed=0;   
+                } else {
                 this.moveSpeed = lerp(this.moveSpeed,0,.15);
-                
+                }
                 
 
                 this.rSpeed = lerp(this.rSpeed, 0, this.rAcc);
@@ -354,7 +362,7 @@
 
 
 
-            this.dMax = .02 * window.innerWidth;
+            this.dMax = .04 * window.innerWidth;
             this.triangleD = [];
             this.triangleR = [];
 
@@ -443,7 +451,7 @@
 
             this.up = true;
 
-            this.dMax = .8 * dMax;
+            this.dMax = .5 * dMax;
             this.canvas = canvas;
             this.context = context;
             this.contextWidth = contextWidth;

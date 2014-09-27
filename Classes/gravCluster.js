@@ -15,6 +15,8 @@
             this.halfW = this.canvas.width / 2;
             this.halfH = this.canvas.height / 2;
 
+                
+            this.imageSwitch = false;
 
             this.rOffSet = 0;
 
@@ -56,6 +58,9 @@
                 //this.platforms[i].display();
 
             }
+            
+          
+            
             dNew = null;
             dUp = null;
 
@@ -69,54 +74,70 @@
             };
 
             this.displayBack = function () {
-
+                
+                if ((this.cX < window.innerWidth + this.halfW) && (this.cX > -this.halfW)) {
+                   if ((this.cY > -this.halfH) && (this.cY < window.innerHeight + this.halfH)) {
+  canvasReset(this.ctx);
+               this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                
-                 if ((this.cX < window.innerWidth + this.halfW) && (this.cX > -this.halfW)) {
-                    if ((this.cY > -this.halfH) && (this.cY < window.innerHeight + this.halfH)) {
+                
+                       
+                      
                    
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
                 this.ctx.fillStyle = "rgb(255,255,255)";
 
                 this.ctx.beginPath();
                 for (var i = this.platforms.length-1; i > 0; i--) {
                     
-                   
+                   if (this.platforms[i].backLayer) {
                     this.platforms[i].display();
+                   }
               
                   
 
                 }
+                
+                
+              
                 //this.ctx.stroke();
                 mCtx.translate(this.cX, this.cY);
                 mCtx.drawImage(this.canvas, -this.halfW, -this.halfH);
                 canvasReset(mCtx);
- }
-                }
+                   }}
+                
             };
             
             this.displayFront = function() {
-                  if ((this.cX < window.innerWidth + this.halfW) && (this.cX > -this.halfW)) {
-                    if ((this.cY > -this.halfH) && (this.cY < window.innerHeight + this.halfH)) {
+
+                if ((this.cX < window.innerWidth + this.halfW) && (this.cX > -this.halfW)) {
+                   if ((this.cY > -this.halfH) && (this.cY < window.innerHeight + this.halfH)) {
+canvasReset(this.ctx);
+               this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);                    
                    
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+               
                 this.ctx.fillStyle = "rgb(255,255,255)";
 
                 this.ctx.beginPath();
-                for (var i = 0; i < this.platforms.length; i++) {
-                    if (this.platforms[i].inFront) {
-                    
+                for (var i = this.platforms.length-1; i > 0; i--) {
+                     if (this.platforms[i].backLayer==false) {
                     this.platforms[i].display();
-                    }
+                   }
+              
+              
+                  
 
                 }
+                
+                
+              
                 //this.ctx.stroke();
                 mCtx.translate(this.cX, this.cY);
                 mCtx.drawImage(this.canvas, -this.halfW, -this.halfH);
                 canvasReset(mCtx);
- }
+                       
                 }
-                
-                
+                }
             }
 
 

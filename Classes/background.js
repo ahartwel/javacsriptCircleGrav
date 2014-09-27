@@ -1,14 +1,16 @@
 
 
         
-        function BackgroundOrbs() {
+        function BackgroundOrbs(id) {
             this.centerX = .5*window.innerWidth;  
             this.centerY = .5 * window.innerHeight;  
              this.d = Math.random() * window.innerWidth;
             this.r = Math.random() * 360;
+            this.id = id;
             
             this.explosion = false;
             this.explosiondisplay = false;
+                 this.hold = false;
             this.explosionCounter=0;
             this.explosionMax=Math.random()*120;
             this.fire = [];
@@ -22,7 +24,7 @@
             }
             
             
-            
+            this.size = Math.random()*(window.innerWidth*0.01);
             
             this.speed = Math.random()+1;
             
@@ -35,6 +37,8 @@
             
             this.explosion = false;
             this.explosiondisplay = false;
+            this.hold = false;
+                
             this.explosionCounter=0;
             this.explosionMax=Math.random()*120;
             this.fire = [];
@@ -54,7 +58,9 @@
             
             
             this.update = function() {
-                
+               if (this.hold==false) {
+                 
+                this.size = Math.random()*(window.innerWidth*0.01);
                 this.d-=this.speed;
                this.r+=person.rSpeed;
                 
@@ -62,11 +68,11 @@
             this.yPos = Math.sin(radians(this.r)) * this.d+GravClusters[person.activeG].cY;
                 
                 if (dist(GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,this.xPos,this.yPos)<=5) {
-                    this.explosion = true;
+                    this.hold = true;
                     this.d = (Math.random() * window.innerWidth*2) - (window.innerWidth*.25) ;
             this.r = Math.random() * 360;
             
-            
+             
             
             this.xPos = Math.cos(radians(this.r)) * this.d+GravClusters[person.activeG].cX;
             this.yPos = Math.sin(radians(this.r)) * this.d+GravClusters[person.activeG].cY;
@@ -74,14 +80,20 @@
                     
                     
                 }
+                   
+               } else {
+               
+               }
                 
                 if (this.explosion) {
                    for (var i =0; i <this.fire.length;i++) {
                     
              this.fire[i].xPos=GravClusters[person.activeG].cX;   
-             this.fire[i].yPos=GravClusters[person.activeG].cY;   
+             this.fire[i].yPos=GravClusters[person.activeG].cY;  
+                       bG.synth.playSound( ((this.size)/(window.innerWidth*0.01)*.8)/15 );
              this.explosion=false;
                        this.explosiondisplay= true;
+                       this.hold=false;
             }
                 }
                     
@@ -92,7 +104,7 @@
                               this.explosionCounter=0;
                               this.xPos = Math.cos(radians(this.r)) * this.d;
             this.yPos = Math.sin(radians(this.r)) * this.d;
-                           
+                           this.reset();
                           }  
                         
                         for (var i =0; i <this.fire.length;i++) {
@@ -108,24 +120,34 @@
                     
                 
                 if (Math.random()<0.01) {
-                 this.reset();   
+                // this.reset();   
                 }
                 
             };
             
-            this.display = function() {
             
+            
+            this.explode = function() {
+                
+             this.explosion = true;   
+                
+            }
+            
+            this.display = function() {
+             
+            bCtx.closePath();
             bCtx.beginPath();
-            bCtx.arc(this.xPos,this.yPos,5,0,2*Math.PI, false);
+            bCtx.arc(this.xPos,this.yPos,this.size,0,2*Math.PI, false);
             bCtx.fill();
             bCtx.closePath();
          
                 if(this.explosiondisplay) {
                     
-                  
+
+            
                     
                         
-                        bCtx.fillStyle = "rgba(0,255,255,.3)";
+                        bCtx.fillStyle = "rgba(110,20,150,.3)";
                       bCtx.beginPath();   
                     for (var i =0; i <this.fire.length;i++) {
                     
@@ -139,7 +161,7 @@
                     
                   
                    
-                     bCtx.fillStyle = "rgba(255,255,255,.3)";
+                    bCtx.fillStyle = "rgba(226,180,150,.1)";
             bCtx.closePath();
                     }
                 
@@ -151,7 +173,10 @@
         
 
         function Background() {
-
+            
+            
+          this.synth = new fmSynth("G2", "triangle","", "", "", "", "square", "fifth", .03, .05, "simpleFM");
+            
             this.xPos = [];
             this.yPos = [];
             this.r = [];
@@ -175,12 +200,32 @@
             
             this.orbs = [];
             
-            for (var i = 0; i<Math.random()*75+25;i++) {
-             this.orbs[i] = new BackgroundOrbs();
+            for (var i = 0; i<Math.random()*75+30;i++) {
+             this.orbs[i] = new BackgroundOrbs(i);
              
             }
             
+            
+            
+            
+            this.bassDrumHit = function() {
+    
+                for (var i =0; i<this.orbs.length;i++) {
+                        if (this.orbs[i].hold) {
+                            this.orbs[i].explode();  
+      
+                        }
+                    }
+                };
+            
+            
+            
+       
+            
+            
             this.update = function () {
+                this.synth.update();
+          
                 
                 for (var i =0; i <this.orbs.length; i++) {
                  this.orbs[i].update();   
@@ -222,14 +267,28 @@
 
             }
 
+            
+            this.mute = function() {
+                
+             this.synth.gain2.gain.value = 0;   
+            }
+            
             this.display = function () {
+                
+                var gradient = bCtx.createRadialGradient(GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,5,GravClusters[person.activeG].cX, GravClusters[person.activeG].cY,.5*window.innerWidth);
+                gradient.addColorStop(0, centerColors[1]);
+                gradient.addColorStop(.6, centerColors[2]);
+                
+                
+                bCtx.fillStyle = gradient;
+                bCtx.fillRect(GravClusters[person.activeG].cX - (.5*window.innerWidth), GravClusters[person.activeG].cY - (.5*window.innerHeight), window.innerWidth, window.innerHeight);
                 
                      bCtx.fillStyle = "rgba(0,0,0,.05)";
                  bCtx.rect(0,0,window.innerWidth, window.innerHeight);   
                  bCtx.fill(); 
                 
                 
-                  bCtx.fillStyle = "rgba(0,0,0,1)";
+                  bCtx.fillStyle = "rgba(0,0,0,.4)";
                     bCtx.beginPath();
                 var i =0;
                 while (i<Math.random()*200) {
@@ -240,7 +299,7 @@
                 }
                 bCtx.fill();
                 
-                 bCtx.fillStyle = "rgba(255,255,255,.5)";
+                   bCtx.fillStyle = "rgba(226,180,150,.1)";
                 for (var i =0; i <this.orbs.length; i++) {
                  this.orbs[i].display();   
                     

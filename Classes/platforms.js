@@ -10,13 +10,15 @@
 
             this.d = d;
             this.r = r;
-            console.log(this.d);
+           
             this.gravId = gravId;
       
             this.inFront = false;
       
             this.firstIteration = true;
             
+        this.backLayer = true;
+      
             this.rSpeed = lerp(0.1, 1, (this.d / (window.innerWidth * .9)));
 
             this.w = (this.d / radius) * (600 - 50) + 50;
@@ -36,7 +38,7 @@
             this.whichTree = 0;
             if (Math.random() < .3) {
                 this.hasTree = true;
-              if (Math.random() < .05) {  
+              if (Math.random() < .99) {  
                   this.tree = new Trees(this.landCanvas.width * 2,  this.landCanvas.width * 2, Math.random() * .5 + .25, this);
                 this.tree.createTrunk();
                                        this.whichTree = 0;
@@ -51,6 +53,10 @@
             }
       
       this.hasRock = false;
+      
+      
+      this.platformType = "";
+      
       
       if (Math.random()<.3) {
           this.rockNum = rockCounter;
@@ -80,7 +86,7 @@
             
             this.checkNote = function() {
               
-                if (this.id == person.activeG) {
+                if (this.gravId == person.activeG) {
                    // console.log(this.r  person.r);
                     //  console.log("haha");
               //  console.log(this.r + " " + person.r);
@@ -108,6 +114,61 @@
             };
             
 
+       this.createClouds = function() {
+                
+             var whichColor = Math.floor(Math.random()*4);
+
+                var color = "rgba(" + cloudColors[whichColor].r + "," + cloudColors[whichColor].g + "," + cloudColors[whichColor].b + ", .3)";
+
+                this.lineColor = Math.floor(Math.random() * 2);
+
+                this.land.fillStyle = color;
+               
+               
+               var x, y;
+               for (var i = 0; i <=Math.random()*15+10;i++) {
+                   whichColor = Math.floor(Math.random()*3);
+
+                color = "rgba(" + cloudColors[whichColor].r + "," + cloudColors[whichColor].g + "," + cloudColors[whichColor].b + ", .3)";
+                    this.land.fillStyle = color;
+                   x=Math.random()*.6*this.landCanvas.width + (.2*this.landCanvas.width);
+                   y= 0.15 * this.landCanvas.width;
+                   for (var p = 0; p <=Math.random()*30;p++) {
+                     whichColor = Math.floor(Math.random()*4);
+
+                color = "rgba(" + cloudColors[whichColor].r + "," + cloudColors[whichColor].g + "," + cloudColors[whichColor].b + ", .1)";
+                    this.land.fillStyle = color;
+               this.land.beginPath();
+                       
+                        y= (0.15 * this.landCanvas.width) + (Math.random() * .15*this.landCanvas.width - (-0.075*this.landCanvas.width));
+                       
+                   this.land.arc(x + Math.random() * (.1*this.landCanvas.width) - (.05*this.landCanvas.width), y, Math.random() * (.15 * this.landCanvas.width), 0, 2 * Math.PI, false);
+               this.land.fill();
+                   }
+               }
+            
+                var color = "rgba(255,255,255,0.1)";
+                                var x, y;
+               for (var i = 0; i <=Math.random()*15+2;i++) {
+                   x=Math.random()*.6*this.landCanvas.width + (.2*this.landCanvas.width);
+                   y= (Math.random()* .3 + 0.15) * this.landCanvas.width;
+                   for (var p = 0; p <=Math.random()*30;p++) {
+                   
+               this.land.beginPath();
+                   this.land.arc(x + Math.random() * (.1*this.landCanvas.width) - (.05*this.landCanvas.width), y, Math.random() * (.15 * this.landCanvas.width), 0, 2 * Math.PI, false);
+               this.land.fill();
+                   }
+               }
+            
+                   
+                
+                
+                
+            };
+      
+      
+      
+      
             this.createLand = function () {
 
 
@@ -289,14 +350,16 @@
                 
             };
 
+           if (this.d<=.6 * window.innerWidth) {
             this.createLand();
-      this.firstIteration = true;
+            this.firstIteration = true;
             this.createLand();
           
             this.createLand();
-      
-      
-        this.blackData = this.land.getImageData(0,0,this.landCanvas.width, this.landCanvas.height);
+               
+               
+               
+                 this.blackData = this.land.getImageData(0,0,this.landCanvas.width, this.landCanvas.height);
      
       var i=0;
      
@@ -313,6 +376,9 @@
               
           } else {
          
+              
+              
+              
           }
          
          
@@ -356,6 +422,22 @@
             
             this.land.drawImage(newCanvas, .02 * this.landCanvas.width,0,.96*this.landCanvas.width,.96*this.landCanvas.height);
             
+        
+               
+               this.platformType = "ground";
+               
+           } else {
+            this.createClouds();  
+               this.platformType = "clouds";
+               this.hasTree = false;
+               this.backLayer = false;
+           }
+      
+      
+       
+      
+      
+      
             
             this.update = function() {
                  this.checkNote();
@@ -388,20 +470,7 @@
       
         
       
-            this.displayRock = function() {
-                
-              if (this.hasRock) {
-                
-                //  rock[this.rockNum].update();
-                
-               this.context.drawImage(rock[this.rockNum].canvas,0,-1 * rock[this.rockNum].canvas.height);   
-                  
-                  
-              }
-                
-                
-                
-            };
+        
                 
             this.displayTree = function() {
                       
@@ -428,7 +497,7 @@
             };
             
             
-            
+          
 
 
             this.display = function () {
@@ -439,25 +508,29 @@
 
 
 
-                if ((this.xPos < window.innerWidth + this.h + 50) && (this.xPos > -this.h - 50)) {
-                    if ((this.yPos < window.innerHeight + this.h + 50) && (this.yPos > -this.h - 50)) {
+             //  if ((this.xPos < window.innerWidth + this.h + 50) && (this.xPos > -this.h - 50)) {
+               //   if ((this.yPos < window.innerHeight + this.h + 50) && (this.yPos > -this.h - 50)) {
                         /*this.context.moveTo(-.5*this.w, 0);
                 this.context.lineTo(.5*this.w, 0);
                 this.context.lineWidth = 5;
                 */
-                            
+                         var addD = 0;
+                      if (this.platformType == "clouds") {
+                      addD = .1 * this.landCanvas.width;    
+                      }       
                 this.context.translate(.5 * this.canvas.width, .5 * this.canvas.height);
                 this.context.rotate(radians(this.r));
-                this.context.translate(this.d, 0);
+                this.context.translate(this.d + addD, 0);
                 this.context.rotate(radians(-270));
                 //this.context.drawImage(this.platforms[i].canvas, -.5 * this.platforms[i].w, 0);
                         
-                        
+                   
+                      
                         this.context.drawImage(this.landCanvas, Math.floor(-.5 * this.w), 0);
                             this.displayTree();
-                            this.displayRock();
-                    }
-                }
+                           
+                   // }
+          //  }
                 canvasReset(this.context);
 
             
@@ -476,15 +549,15 @@
 
 
 
-                if (dist(this.xPos, this.yPos, person.xPos, person.yPos) < person.canvas.width + 200) {
+                if (dist(this.xPos, this.yPos, person.xPos, person.yPos) < person.canvas.width + 100) {
 
                     var aX = this.xPos + (Math.cos(radians(this.r + 90)) * (.51 * this.w));
                     var aY = this.yPos + (Math.sin(radians(this.r + 90)) * (.51 * this.w));
 
                     var bX = this.xPos - (Math.cos(radians(this.r + 90)) * (.51 * this.w));
                     var bY = this.yPos - (Math.sin(radians(this.r + 90)) * (.51 * this.w));
-                    /*
-    mCtx.beginPath();
+                    
+   /* mCtx.beginPath();
     mCtx.strokeStyle="rgb(255,255,255)";
    
     mCtx.moveTo(aX,aY);
@@ -504,8 +577,8 @@
                     var x = lerp(bX, aX, d / (d + c));
                     var y = lerp(bY, aY, d / (d + c));
                     //console.log(d);
-                    if (dist(person.xPos, person.yPos, x, y) <= person.w * .8) {
-                    
+                    if (dist(person.xPos, person.yPos, x, y) <= person.w * .6) {
+                   
                       
                         
                         if (person.dAcc > 0) {
@@ -548,8 +621,70 @@
     }
     
     */
+                
+                
+           
+                    
+                    
+                    
+                    
+                    
+             
+                
+                
+                
+                
+                
+                //----------- split to rock collision
+                for (var i =0; i<rock.length;i++) {     
+                
+                
+            //REMOVE    if (dist(this.xPos, this.yPos, rock[i].xPos, rock[i].yPos) < rock[i].canvas.width + 200) {
+
+                    var aX = this.xPos + (Math.cos(radians(this.r + 90)) * (.51 * this.w));
+                    var aY = this.yPos + (Math.sin(radians(this.r + 90)) * (.51 * this.w));
+
+                    var bX = this.xPos - (Math.cos(radians(this.r + 90)) * (.51 * this.w));
+                    var bY = this.yPos - (Math.sin(radians(this.r + 90)) * (.51 * this.w));
+                    
+                    
+                    
+                    
+                    var d = dist(bX, bY, rock[i].xPos, rock[i].yPos);
+                    var c = dist(aX, aY, rock[i].xPos, rock[i].yPos);
+                    var x = lerp(bX, aX, d / (d + c));
+                    var y = lerp(bY, aY, d / (d + c));
+                    
+                    
+                  
+                    
+                    
+                   
+                    if (dist(rock[i].xPos, rock[i].yPos, x, y) <= 5) {
+                    
+                        
+                       
+                          
+                                rock[i].dAcc = -rock[i].gravity;
+                            
+
+                            rock[i].rSpeed =  this.rSpeed;
+                           
+                            
+                            rock[i].dis += .1;
+
+                       
+
+                    }
+              // TAKE OUT  }
+                
+                }
 
             };
 
 
+ 
+      
+      
+      
         }
